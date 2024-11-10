@@ -1,6 +1,7 @@
 # TUI Color inspector
 
-A simple TUI color inspector that prints out the colors that you pass as arguments, colored with the color itself.
+A simple TUI color inspector that prints out the colors that you pass as arguments, in all the formats, colored with the
+color itself.
 
 Supports all HTML colors, hexadecimal, and RGB.
 

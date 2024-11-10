@@ -242,12 +242,31 @@ func parseColor(color string) (RGB, error) {
 	return RGB{}, fmt.Errorf("unsupported color format: %s", color)
 }
 
-func printColorBlock(color string, rgb RGB) {
-	bgColor := fmt.Sprintf("\033[48;2;%d;%d;%dm", rgb.R, rgb.G, rgb.B)
-	reset := "\033[0m"
+func findColorName(rgb RGB) string {
+    for name := range htmlColors {
+        if rgb == htmlColors[name] {
+            return name
+        }
+    }
+    return ""
+}
 
-	padding := "     "
-	fmt.Printf("%s%s%s%s%s\n", bgColor, padding, color, padding, reset)
+func printColorBlock(rgb RGB) {
+    bgColor := fmt.Sprintf("\033[48;2;%d;%d;%dm", rgb.R, rgb.G, rgb.B)
+    reset := "\033[0m"
+    padding := "  "
+
+    hexColor := fmt.Sprintf("#%02X%02X%02X", rgb.R, rgb.G, rgb.B)
+    rgbStr := fmt.Sprintf("rgb(%d,%d,%d)", rgb.R, rgb.G, rgb.B)
+    colorName := findColorName(rgb)
+
+    formats := []string{hexColor, rgbStr}
+    if colorName != "" {
+        formats = append(formats, colorName)
+    }
+    allFormats := strings.Join(formats, " | ")
+
+    fmt.Printf("%s%s%s%s%s\n", bgColor, padding, allFormats, padding, reset)
 }
 
 func main() {
@@ -266,6 +285,6 @@ func main() {
 			fmt.Printf("\033[31mError: %v\033[0m\n", err)
 			continue
 		}
-		printColorBlock(colorArg, rgb)
+		printColorBlock(rgb)
 	}
 }
