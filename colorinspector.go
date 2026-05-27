@@ -266,7 +266,14 @@ func printColorBlock(rgb RGB) {
     }
     allFormats := strings.Join(formats, " | ")
 
-    fmt.Printf("%s%s%s%s%s\n", bgColor, padding, allFormats, padding, reset)
+    brightness := (rgb.R*299 + rgb.G*587 + rgb.B*114) / 1000
+
+    fgColor := "\033[97m"
+    if brightness > 186 {
+        fgColor = "\033[30m"
+    }
+
+    fmt.Printf("%s%s%s%s%s%s\n", bgColor, fgColor, padding, allFormats, padding, reset)
 }
 
 func main() {
