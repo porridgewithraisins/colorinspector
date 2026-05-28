@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+var (
+	showHex  bool
+	showRGB  bool
+	showName bool
+)
+
 type RGB struct {
 	R, G, B int
 }
@@ -243,41 +249,67 @@ func parseColor(color string) (RGB, error) {
 }
 
 func findColorName(rgb RGB) string {
-    for name := range htmlColors {
-        if rgb == htmlColors[name] {
-            return name
-        }
-    }
-    return ""
+	for name := range htmlColors {
+		if rgb == htmlColors[name] {
+			return name
+		}
+	}
+	return ""
 }
 
 func printColorBlock(rgb RGB) {
-    bgColor := fmt.Sprintf("\033[48;2;%d;%d;%dm", rgb.R, rgb.G, rgb.B)
-    reset := "\033[0m"
-    padding := "  "
+	bgColor := fmt.Sprintf("\033[48;2;%d;%d;%dm", rgb.R, rgb.G, rgb.B)
+	reset := "\033[0m"
+	padding := "  "
 
-    hexColor := fmt.Sprintf("#%02X%02X%02X", rgb.R, rgb.G, rgb.B)
-    rgbStr := fmt.Sprintf("rgb(%d,%d,%d)", rgb.R, rgb.G, rgb.B)
-    colorName := findColorName(rgb)
+	hexColor := fmt.Sprintf("#%02X%02X%02X", rgb.R, rgb.G, rgb.B)
+	rgbStr := fmt.Sprintf("rgb(%d,%d,%d)", rgb.R, rgb.G, rgb.B)
+	colorName := findColorName(rgb)
 
-    formats := []string{hexColor, rgbStr}
-    if colorName != "" {
-        formats = append(formats, colorName)
+	formats := []string{}
+    if showHex {
+        formats = append(formats, hexColor)
     }
-    allFormats := strings.Join(formats, " | ")
-
-    brightness := (rgb.R*299 + rgb.G*587 + rgb.B*114) / 1000
-
-    fgColor := "\033[97m"
-    if brightness > 186 {
-        fgColor = "\033[30m"
+    if showRGB {
+        formats = append(formats, rgbStr)
     }
+	if colorName != "" && showName {
+		formats = append(formats, colorName)
+	}
+	allFormats := strings.Join(formats, " | ")
 
-    fmt.Printf("%s%s%s%s%s%s\n", bgColor, fgColor, padding, allFormats, padding, reset)
+	brightness := (rgb.R*299 + rgb.G*587 + rgb.B*114) / 1000
+
+	fgColor := "\033[97m"
+	if brightness > 186 {
+		fgColor = "\033[30m"
+	}
+
+	fmt.Printf("%s%s%s%s%s%s\n", bgColor, fgColor, padding, allFormats, padding, reset)
 }
 
 func main() {
-	if len(os.Args) < 2 {
+	args := []string{}
+	for _, arg := range os.Args[1:] {
+		switch arg {
+		case "--hex":
+			showHex = true
+		case "--rgb":
+			showRGB = true
+		case "--name":
+			showName = true
+		default:
+			args = append(args, arg)
+		}
+	}
+
+	if !showHex && !showRGB && !showName {
+		showHex = true
+		showRGB = true
+		showName = true
+	}
+
+	if len(args) == 0 {
 		fmt.Printf("Usage: %s <color1> [color2 ...]\n", os.Args[0])
 		fmt.Println("Supported formats:")
 		fmt.Println("  - HTML color names (e.g., 'red', 'blue')")
@@ -286,7 +318,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	for _, colorArg := range os.Args[1:] {
+	for _, colorArg := range args {
 		rgb, err := parseColor(colorArg)
 		if err != nil {
 			fmt.Printf("\033[31mError: %v\033[0m\n", err)
