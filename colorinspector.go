@@ -310,11 +310,12 @@ func main() {
 	}
 
 	if len(args) == 0 {
-		fmt.Printf("Usage: %s <color1> [color2 ...]\n", os.Args[0])
+		fmt.Printf("Usage: %s [--hex|rgb|name] <color1> [color2 ...]\n", os.Args[0])
 		fmt.Println("Supported formats:")
 		fmt.Println("  - HTML color names (e.g., 'red', 'blue')")
 		fmt.Println("  - Hex values e.g., '#FF0000', '#f00', case insensitive")
 		fmt.Println("  - RGB values e.g., 'rgb(255,0,0)' or '255, 0, 0', space insensitive")
+		fmt.Println("  - If you specify one or more of --hex --rgb or --name you will get only those formats. If the absence of any of them, you will get all.")
 		os.Exit(1)
 	}
 
